@@ -1,56 +1,61 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>رفع صورة إلى GitHub</title>
+  <title>📸 رفع صورة إلى GitHub</title>
   <style>
-    body { font-family: 'Tajawal', sans-serif; padding: 30px; background: #f2f2f2; text-align: center; }
-    input, button { padding: 10px; margin: 10px; font-size: 16px; }
-    img { max-width: 300px; margin-top: 20px; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; text-align: center; padding: 50px; }
+    .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: inline-block; }
+    input[type="file"] { margin-bottom: 10px; }
+    button { padding: 10px 20px; background: #28a745; border: none; color: white; border-radius: 5px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h2>📤 رفع صورة إلى GitHub</h2>
-  <input type="file" id="fileInput" accept="image/*">
-  <br>
-  <button onclick="uploadToGitHub()">رفع الآن</button>
-  <div id="result"></div>
+  <div class="box">
+    <h2>رفع صورة إلى GitHub</h2>
+    <input type="file" id="imageInput"><br>
+    <input type="password" id="tokenInput" placeholder="🔒 أدخل GitHub Token"><br><br>
+    <button onclick="uploadImage()">رفع</button>
+    <p id="message"></p>
+  </div>
 
   <script>
-    async function uploadToGitHub() {
-      const fileInput = document.getElementById('fileInput');
+    async function uploadImage() {
+      const fileInput = document.getElementById('imageInput');
+      const token = document.getElementById('tokenInput').value.trim();
       const file = fileInput.files[0];
-      if (!file) return alert("يرجى اختيار صورة أولاً");
-
       const reader = new FileReader();
-      reader.onloadend = async function () {
-        const base64 = reader.result.split(',')[1];
-        const fileName = `${Date.now()}-${file.name}`;
 
-        const response = await fetch("https://api.github.com/repos/watsa09192/mazen/contents/images/" + fileName, {
-          method: "PUT",
+      if (!token) {
+        alert("يرجى إدخال GitHub Token أولاً.");
+        return;
+      }
+
+      reader.onloadend = async () => {
+        const base64 = reader.result.split(',')[1];
+
+        const res = await fetch('https://api.github.com/repos/watsa09192/mazen/contents/images/' + file.name, {
+          method: 'PUT',
           headers: {
-            "Authorization": "token ✨✨✨ ضع التوكن الخاص بك هنا ✨✨✨",
-            "Content-Type": "application/json"
+            'Authorization': 'token ' + token,
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            message: `upload ${fileName}`,
+            message: "Upload " + file.name,
             content: base64
           })
         });
 
-        const result = await response.json();
-        if (response.ok) {
-          document.getElementById('result').innerHTML = `
-            ✅ تم رفع الصورة:
-            <br><a href="${result.content.download_url}" target="_blank">${result.content.download_url}</a>
-            <br><img src="${result.content.download_url}" alt="الصورة">
-          `;
+        const message = document.getElementById('message');
+        const result = await res.json();
+        if (res.ok) {
+          message.innerHTML = "✅ تم رفع الصورة بنجاح!<br><a href='" + result.content.download_url + "' target='_blank'>رابط الصورة</a>";
         } else {
-          alert("فشل الرفع: " + result.message);
-          console.error(result);
+          message.innerText = "❌ فشل رفع الصورة: " + (result.message || "حدث خطأ");
         }
       };
+
       reader.readAsDataURL(file);
     }
   </script>
