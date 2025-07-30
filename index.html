@@ -1,88 +1,58 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة التحكم - رفع الملفات</title>
+  <meta charset="UTF-8">
+  <title>رفع صورة إلى GitHub</title>
   <style>
-    body {
-      font-family: 'Tajawal', sans-serif;
-      background: #f4f4f4;
-      text-align: center;
-      padding: 40px;
-      direction: rtl;
-    }
-    h2 { color: #2c3e50; }
-    #gallery a {
-      display: block;
-      margin: 5px 0;
-      color: #2980b9;
-      text-decoration: none;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #27ae60;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover { background: #219150; }
+    body { font-family: 'Tajawal', sans-serif; padding: 30px; background: #f2f2f2; text-align: center; }
+    input, button { padding: 10px; margin: 10px; font-size: 16px; }
+    img { max-width: 300px; margin-top: 20px; }
   </style>
 </head>
 <body>
+  <h2>📤 رفع صورة إلى GitHub</h2>
+  <input type="file" id="fileInput" accept="image/*">
+  <br>
+  <button onclick="uploadToGitHub()">رفع الآن</button>
+  <div id="result"></div>
 
-  <h2>📁 لوحة رفع الملفات</h2>
-  <input type="file" id="fileInput" />
-  <br><br>
-  <button onclick="uploadFile()">📤 رفع</button>
-
-  <hr>
-  <h3>📂 المعرض:</h3>
-  <div id="gallery"></div>
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDZn7a-YzUE06VSiyhakzPwPAThnr5dY",
-      authDomain: "mazen-c3fb2.firebaseapp.com",
-      projectId: "mazen-c3fb2",
-      storageBucket: "mazen-c3fb2.appspot.com",
-      messagingSenderId: "252102472862",
-      appId: "1:252102472862:web:7f211218c30a27ee768b6f"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const storage = getStorage(app);
-
-    // رفع الملفات
-    window.uploadFile = async function () {
+  <script>
+    async function uploadToGitHub() {
       const fileInput = document.getElementById('fileInput');
       const file = fileInput.files[0];
-      if (!file) return alert("يرجى اختيار ملف");
+      if (!file) return alert("يرجى اختيار صورة أولاً");
 
-      const storageRef = ref(storage, 'uploads/' + file.name);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      alert('✅ تم رفع الملف بنجاح');
-      document.getElementById('gallery').innerHTML += `<a href="${url}" target="_blank">${file.name}</a>`;
+      const reader = new FileReader();
+      reader.onloadend = async function () {
+        const base64 = reader.result.split(',')[1];
+        const fileName = `${Date.now()}-${file.name}`;
+
+        const response = await fetch("https://api.github.com/repos/watsa09192/mazen/contents/images/" + fileName, {
+          method: "PUT",
+          headers: {
+            "Authorization": "token ✨✨✨ ضع التوكن الخاص بك هنا ✨✨✨",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: `upload ${fileName}`,
+            content: base64
+          })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          document.getElementById('result').innerHTML = `
+            ✅ تم رفع الصورة:
+            <br><a href="${result.content.download_url}" target="_blank">${result.content.download_url}</a>
+            <br><img src="${result.content.download_url}" alt="الصورة">
+          `;
+        } else {
+          alert("فشل الرفع: " + result.message);
+          console.error(result);
+        }
+      };
+      reader.readAsDataURL(file);
     }
-
-    // عرض الملفات
-    async function listFiles() {
-      const listRef = ref(storage, 'uploads/');
-      const res = await listAll(listRef);
-      res.items.forEach(async (itemRef) => {
-        const url = await getDownloadURL(itemRef);
-        document.getElementById('gallery').innerHTML += `<a href="${url}" target="_blank">${itemRef.name}</a>`;
-      });
-    }
-
-    listFiles();
   </script>
 </body>
 </html>
