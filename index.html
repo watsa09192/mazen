@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>لوحة التحكم - الوسائط</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="flex h-screen">
+    <aside class="w-64 bg-white shadow p-4">
+      <h2 class="text-xl font-bold mb-4">📁 مدير الوسائط</h2>
+      <ul>
+        <li><a href="#" class="block py-2">📤 رفع ملفات</a></li>
+        <li><a href="#" class="block py-2">🖼️ المعرض</a></li>
+      </ul>
+    </aside>
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-bold mb-4">تحميل وعرض الصور والفيديوهات</h1>
+      <input type="file" id="fileInput" multiple class="mb-4" />
+      <button onclick="uploadFiles()" class="bg-green-600 text-white px-4 py-2 rounded">رفع</button>
+      <div id="gallery" class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6"></div>
+    </main>
+  </div>
+  <script>
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDzyn7A-vzUE06VSiyhakzPwAMthr5dY",
+  authDomain: "mazen-c3fb2.firebaseapp.com",
+  projectId: "mazen-c3fb2",
+  storageBucket: "mazen-c3fb2.appspot.com",
+  messagingSenderId: "218152708076",
+  appId: "1:218152708076:web:f77f40127ee768b6f27b6f"
+};
+</script>
+  <script src="js/app.js"></script>
+</body>
+</html>
